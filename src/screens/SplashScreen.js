@@ -22,7 +22,7 @@ const SplashScreen = ({ navigation }) => {
         <Text style={styles.title}>Passwordless Login at your fingertips!</Text>
         <Text style={styles.text}>Sign in!</Text>
         <View style={styles.button}>
-        <TouchableOpacity onPress={()=> navigation.navigate('Home')}>
+        <TouchableOpacity onPress={()=> navigation.navigate('SignIn')}>
             <LinearGradient
             colors={['#08d4c4', '#01ab9d']}
             style={styles.signIn}>
