@@ -21,7 +21,8 @@ const SignInScreen = ({navigation}) => {
       />
       <StatusBar backgroundColor='#009387' barStyle='light-content' />
       <View style={styles.header}>
-          <Text style={styles.text_header}>Welcome!</Text>
+        {loading ? <Text style={styles.text_header}>Loading...</Text>:
+            <Text style={styles.text_header}>Welcome!</Text>}
       </View>
       {loading ? <Image style={styles.container} source={require('../loadingGif.gif')} />:
       <Animatable.View

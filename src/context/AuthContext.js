@@ -117,7 +117,35 @@ const signin = (dispatch) => {
                 dispatch({ type: 'add_error', payload: 'Problem storing JWT'});
                 console.log(err.response.data);
             }  
-            generateKeys();
+            
+            console.log('reaches generatekeys');
+            try{
+               //generate keypair and assign to public and private
+               const keyPair = pki.rsa.generateKeyPair(2048);
+                console.log('gets past basic generation');
+               dispatch({type:'public_key_gen', payload:keyPair.publicKey});
+               /*try{
+                   await AsyncStorage.setItem('publicKey', keyPair.publicKey);
+               }
+               catch(err){
+                   dispatch({ type: 'add_error', payload: 'Problem storing public key'});
+                   console.log(err.response.data);
+               }*/
+       
+               dispatch({type:'private_key_gen', payload:keyPair.privateKey});
+               /*try{
+                   await AsyncStorage.setItem('privateKey', keyPair.privateKey);
+               }
+               catch(err){
+                   dispatch({ type: 'add_error', payload: 'Problem storing public key'});
+                   console.log(err.response.data);
+               }*/
+           }
+           catch(err){
+               dispatch({ type: 'add_error', payload: 'Problem generating keys'});
+               console.log(err.response.data);
+           }
+
             //move to main flow(account page, landing page, etc)
             navigate('mainFlow');
         }
