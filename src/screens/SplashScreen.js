@@ -1,10 +1,18 @@
-import React from 'react';
+import React, {useContext, useEffect} from 'react';
 import { View, Button, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
+import { Context as AuthContext } from '../context/AuthContext';
+
+
 
 const SplashScreen = ({ navigation }) => {
+    const { state, tryLocalSignIn } = useContext(AuthContext);
+    useEffect(() => {
+        tryLocalSignIn();
+    }, []);
+
   return <View style={styles.container}>
     <View style={styles.header}>
         <View style={styles.backgroundContainer}>

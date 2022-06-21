@@ -1,68 +1,25 @@
-import React from 'react';
+import React, {useContext, useState} from 'react';
 import { View, Button, Text, StyleSheet, TextInput, Dimensions, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
+import { Context as AuthContext } from '../context/AuthContext';
+import { NavigationEvents } from 'react-navigation';
 
 const SignUpScreen = ({navigation}) => {
 
-    const [data, setData] = React.useState({
-        email: '',
-        password: '',
-        confirm_password: '',
-        check_textInputChange: false,
-        secureTextEntry: true,
-        confirm_secureTextEntry: true,
-    });
-
-    const textInputChange = (val) => {
-        if(val.length != 0){
-            setData({
-                ...data, 
-                email: val,
-                check_textInputChange: true
-            });
-        }
-        else{
-            setData({
-                ...data,
-                email: val,
-                check_textInputChange: false
-            });
-        }
-    }
-
-    const handlePasswordChange = (val) => {
-        setData({
-            ...data,
-            password: val
-        });
-    }
-
-    const handleConfirmPasswordChange = (val) => {
-        setData({
-            ...data,
-            confirm_password: val
-        });
-    }
-
-    const updateSecureTextEntry = () => {
-        setData({
-            ...data,
-            secureTextEntry: !data.secureTextEntry
-        });
-    }
-
-    const updateConfirmSecureTextEntry = () => {
-        setData({
-            ...data,
-            confirm_secureTextEntry: !data.confirm_secureTextEntry
-        });
-    }
-
+    const { state, signup, clearErrorMessage } = useContext(AuthContext);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirm_password, setConfirmPassword] = useState('');
+    const [secureTextEntry, setSecureTextEntry] = useState(true);
+    const [confirm_secureTextEntry, setConfirmSecureTextEntry] = useState(true);
 
   return <View style={styles.container}>
+    <NavigationEvents 
+        onWillBlur={clearErrorMessage}
+      />
       <StatusBar backgroundColor='#009387' barStyle='light-content' />
       <View style={styles.header}>
           <Text style={styles.text_header}>Register Now</Text>
@@ -77,16 +34,8 @@ const SignUpScreen = ({navigation}) => {
                 placeholder='Your Email'
                 style={styles.textInput}
                 autoCapitalize='none'
-                onChangeText={(val) => textInputChange(val)}
+                onChangeText={setEmail}
             />
-            {data.check_textInputChange ? 
-            <Animatable.View animation="bounceIn">
-            <Feather
-                name='check-circle'
-                color='green'
-                size={20}
-            /> 
-            </Animatable.View>: null}
           </View>
           <Text style={[styles.text_footer, { marginTop: 35}]}>Password</Text>
           <View style={styles.action}>
@@ -95,23 +44,11 @@ const SignUpScreen = ({navigation}) => {
                 placeholder='Your Password'
                 style={styles.textInput}
                 autoCapitalize='none'
-                secureTextEntry={data.secureTextEntry}
-                onChangeText={(val) => handlePasswordChange(val)}
+                secureTextEntry={secureTextEntry}
+                onChangeText={setPassword}
 
             />
-            <TouchableOpacity onPress = {() =>updateSecureTextEntry()}>
-                {data.secureTextEntry ?
-                <Feather
-                    name='eye-off'
-                    color='grey'
-                    size={20}
-                /> :
-                <Feather
-                    name='eye'
-                    color='grey'
-                    size={20}
-                />}
-            </TouchableOpacity>
+            
           </View>
           <Text style={[styles.text_footer, { marginTop: 35}]}>Confirm Password</Text>
           <View style={styles.action}>
@@ -120,31 +57,28 @@ const SignUpScreen = ({navigation}) => {
                 placeholder='Confirm Your Password'
                 style={styles.textInput}
                 autoCapitalize='none'
-                secureTextEntry={data.confirm_secureTextEntry}
-                onChangeText={(val) => handleConfirmPasswordChange(val)}
+                secureTextEntry={confirm_secureTextEntry}
+                onChangeText={setConfirmPassword}
 
             />
-            <TouchableOpacity onPress = {() =>updateConfirmSecureTextEntry()}>
-                {data.confirm_secureTextEntry ?
-                <Feather
-                    name='eye-off'
-                    color='grey'
-                    size={20}
-                /> :
-                <Feather
-                    name='eye'
-                    color='grey'
-                    size={20}
-                />}
-            </TouchableOpacity>
+            
           </View>
+          {state.errorMessage ? <Text style={styles.errorMessage}>{state.errorMessage}</Text> : null}
           <View style={styles.button}>
-                <LinearGradient
-                    colors={['#08d4c4', '#01ab9d']}
-                    style={styles.signIn}
-                >
-                    <Text style={[styles.textSign, {color: '#fff'}]}>Sign Up</Text>
-                </LinearGradient>
+                <TouchableOpacity
+                    onPress={()=> signup({ email, password })}
+                    style={[styles.signIn, {
+                        borderColor: '#009387',
+                        borderWidth: 1,
+                        marginTop: 15
+                    }]}>
+                    <LinearGradient
+                        colors={['#08d4c4', '#01ab9d']}
+                        style={styles.signIn}
+                    >
+                        <Text style={[styles.textSign, {color: '#fff'}]}>Sign Up</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => navigation.navigate('SignIn')}
@@ -163,6 +97,12 @@ const SignUpScreen = ({navigation}) => {
 
 
 const styles = StyleSheet.create({
+  errorMessage: {
+    fontSize: 16,
+    color: 'red',
+    marginLeft:15,
+    marginTop:15
+  },  
   container: {
       flex: 1,
       backgroundColor: '#009387'

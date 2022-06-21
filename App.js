@@ -1,51 +1,55 @@
-import { createAppContainer } from "react-navigation";
-import { createStackNavigator } from "react-navigation-stack";
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-//import HomeScreen from "./src/screens/HomeScreen";
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { NavigationContainer } from  '@react-navigation/native';
+import React from 'react';
+import { createAppContainer, createSwitchNavigator } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
+import { createBottomTabNavigator } from 'react-navigation-tabs';
+import HomeScreen from "./src/screens/HomeScreen";
 import SplashScreen from "./src/screens/SplashScreen";
 import SignInScreen from "./src/screens/SignInScreen";
 import SignUpScreen from "./src/screens/SignUpScreen";
+import AccountScreen from './src/screens/AccountScreen';
+import LandingScreen from './src/screens/LandingScreen';
 import TestScreen from "./src/screens/TestScreen";
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer } from  '@react-navigation/native';
+
 import MainTabScreen from "./src/screens/MainTabScreen";
+import { Provider } from './src/context/AuthContext';
+import { setNavigator } from './src/navigationRef';
 
-//tconst HomeStack = createStackNavigator();
-//const SignInStack = createStackNavigator();
-//const SignUpStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
-
-const App = () => {
-    return (
-      <NavigationContainer>
-        <Drawer.Navigator initialRouteName="Home">
-          <Drawer.Screen name="Home" component={MainTabScreen} />
-        </Drawer.Navigator>
-      </NavigationContainer>
-    );
+function drawerScreen(){
+  return (
+    <NavigationContainer>
+      <Drawer.Navigator initialRouteName='Home' screenOptions={{ headerShown: false }}>
+        <Drawer.Screen name="Account" component={AccountScreen} />
+        <Drawer.Screen name="Landing" component={LandingScreen} />
+      </Drawer.Navigator>
+    </NavigationContainer>
+  );
 }
 
-const navigator = createStackNavigator(
-  {
-    //Home: HomeScreen,
+const switchNavigator = createSwitchNavigator({
+  loginFlow: createStackNavigator({
     Splash: SplashScreen,
-    SignIn: SignInScreen,
     SignUp: SignUpScreen,
-    Test: TestScreen,
-  },
-  {
-    initialRouteName: "Home",
-    defaultNavigationOptions: {
-      title: "App",
-    },
-  }
-);
+    SignIn: SignInScreen,
+  }),
+  mainFlow: createStackNavigator({
+    Drawer: drawerScreen
+  }),
+});
 
-//export default createAppContainer(navigator);*/
+const App = createAppContainer(switchNavigator);
 
-export default App;
-
-/*
-<Drawer.Screen name="SignIn" component={SignInScreen} />
-          <Drawer.Screen name="SignUp" component={SignUpScreen} />
-          */
+export default () => {
+  return (
+    <Provider>
+      <App
+        ref={(navigator) => {
+          setNavigator(navigator);
+        }}
+      />
+    </Provider>
+  );
+};

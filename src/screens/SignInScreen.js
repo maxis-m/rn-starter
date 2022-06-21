@@ -1,55 +1,29 @@
-import React from 'react';
-import { View, Button, Text, StyleSheet, TextInput, Dimensions, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import React, {useContext, useState} from 'react';
+import { View, Button, Text, StyleSheet, TextInput, Dimensions, TouchableOpacity, Platform, StatusBar, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
+import { Context as AuthContext } from '../context/AuthContext';
+import { NavigationEvents } from 'react-navigation';
 
 const SignInScreen = ({navigation}) => {
 
-    const [data, setData] = React.useState({
-        email: '',
-        password: '',
-        check_textInputChange: false,
-        secureTextEntry: true
-    });
-
-    const textInputChange = (val) => {
-        if(val.length != 0){
-            setData({
-                ...data, 
-                email: val,
-                check_textInputChange: true
-            });
-        }
-        else{
-            setData({
-                ...data,
-                email: val,
-                check_textInputChange: false
-            });
-        }
-    }
-
-    const handlePasswordChange = (val) => {
-        setData({
-            ...data,
-            password: val
-        });
-    }
-
-    const updateSecureTextEntry = () => {
-        setData({
-            ...data,
-            secureTextEntry: !data.secureTextEntry
-        });
-    }
+    const { state, signin, clearErrorMessage } = useContext(AuthContext);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
   return <View style={styles.container}>
+      <NavigationEvents 
+        onWillBlur={()=>{setLoading(false)
+            clearErrorMessage}}
+      />
       <StatusBar backgroundColor='#009387' barStyle='light-content' />
       <View style={styles.header}>
           <Text style={styles.text_header}>Welcome!</Text>
       </View>
+      {loading ? <Image style={styles.container} source={require('../loadingGif.gif')} />:
       <Animatable.View
         animation="fadeInUpBig"
         style={styles.footer}>
@@ -60,16 +34,8 @@ const SignInScreen = ({navigation}) => {
                 placeholder='Your Email'
                 style={styles.textInput}
                 autoCapitalize='none'
-                onChangeText={(val) => textInputChange(val)}
+                onChangeText={setEmail}
             />
-            {data.check_textInputChange ? 
-            <Animatable.View animation="bounceIn">
-            <Feather
-                name='check-circle'
-                color='green'
-                size={20}
-            /> 
-            </Animatable.View>: null}
           </View>
           <Text style={[styles.text_footer, { marginTop: 35}]}>Password</Text>
           <View style={styles.action}>
@@ -78,47 +44,44 @@ const SignInScreen = ({navigation}) => {
                 placeholder='Your Password'
                 style={styles.textInput}
                 autoCapitalize='none'
-                secureTextEntry={data.secureTextEntry}
-                onChangeText={(val) => handlePasswordChange(val)}
+                secureTextEntry={true}
+                onChangeText={setPassword}
 
             />
-            <TouchableOpacity onPress = {() =>updateSecureTextEntry()}>
-                {data.secureTextEntry ?
-                <Feather
-                    name='eye-off'
-                    color='grey'
-                    size={20}
-                /> :
-                <Feather
-                    name='eye'
-                    color='grey'
-                    size={20}
-                />}
-            </TouchableOpacity>
           </View>
+          {state.errorMessage ? <Text style={styles.errorMessage}>{state.errorMessage}</Text> : null}
           <View style={styles.button}>
+            <TouchableOpacity
+                    onPress={()=> {
+                        setLoading(true);
+                        signin({ email, password });
+                    }}
+                    style={[styles.signIn, {
+                        borderColor: '#009387',
+                        borderWidth: 1,
+                        marginTop: 15
+                    }]}>
                 <LinearGradient
                     colors={['#08d4c4', '#01ab9d']}
                     style={styles.signIn}
                 >
                     <Text style={[styles.textSign, {color: '#fff'}]}>Sign In</Text>
                 </LinearGradient>
+            </TouchableOpacity>
 
-                <TouchableOpacity
-                    onPress={() => navigation.navigate('SignUp')}
-                    style={[styles.signIn, {
-                        borderColor: '#009387',
-                        borderWidth: 1,
-                        marginTop: 15
-                    }]}
-                >
-                    <Text style={[styles.textSign, {color: '#009387'}]}>Sign Up</Text>
-                </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => navigation.navigate('SignUp')}
+                style={[styles.signIn, {
+                    borderColor: '#009387',
+                    borderWidth: 1,
+                    marginTop: 15
+                }]}
+            >
+                <Text style={[styles.textSign, {color: '#009387'}]}>Sign Up</Text>
+            </TouchableOpacity>
           </View>
-      </Animatable.View>
-  </View>;
-};
-
+      </Animatable.View>}
+        </View>}
 
 const styles = StyleSheet.create({
   container: {
