@@ -10,7 +10,7 @@ import { NavigationEvents } from 'react-navigation';
 const SignInScreen = ({navigation}) => {
 
     const { state, signin, clearErrorMessage } = useContext(AuthContext);
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -28,14 +28,14 @@ const SignInScreen = ({navigation}) => {
       <Animatable.View
         animation="fadeInUpBig"
         style={styles.footer}>
-          <Text style={styles.text_footer}>Email</Text>
+          <Text style={styles.text_footer}>Username</Text>
           <View style={styles.action}>
             <FontAwesome name='user-o' color='#05375a' size={20} />
             <TextInput
-                placeholder='Your Email'
+                placeholder='Your Username'
                 style={styles.textInput}
                 autoCapitalize='none'
-                onChangeText={setEmail}
+                onChangeText={setUsername}
             />
           </View>
           <Text style={[styles.text_footer, { marginTop: 35}]}>Password</Text>
@@ -55,7 +55,7 @@ const SignInScreen = ({navigation}) => {
             <TouchableOpacity
                     onPress={()=> {
                         setLoading(true);
-                        signin({ email, password });
+                        signin({ username, password });
                     }}
                     style={[styles.signIn, {
                         borderColor: '#009387',

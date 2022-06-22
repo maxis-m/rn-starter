@@ -26,6 +26,36 @@ const authReducer = (state,action) => {
     }
 };
 
+
+/**
+ * Makes a certificate signing request (CSR).
+ *
+ * @param privateKey private key object (NOT a pem string)
+ * @param publicKey public key object (NOT a pem string)
+ * @param nameValue string to put in commonName field of certificate
+ *
+ * @returns PEM string format of certificate signing request.
+ */
+const makeCSR = (publicKey, privateKey, username) => {
+  
+    var csr = forge.pki.createCertificationRequest();
+    csr.publicKey = publicKey;
+    // set (optional) attributes
+    csr.setAttributes({
+        name: 'username',
+        value: username
+    });
+
+    // sign certification request
+    csr.sign(privateKey);
+
+    // convert certification request to PEM-format
+    const pem = forge.pki.certificationRequestToPem(csr);
+    console.log(pem);
+    //console.log(pem);
+    return pem;
+  }
+
 const generateKeys = dispatch => async () => {
      console.log('reaches generatekeys');
      try{
@@ -76,11 +106,11 @@ const clearErrorMessage = dispatch => () => {
 };
 
 const signup = (dispatch) => {
-    return async ( { email, password } ) => {
+    return async ( { username, password } ) => {
         //make api request to sign up
         try {
             //signin with api
-            const response = await loginApi.post('/signup', {email, password});
+            const response = await loginApi.post('/signup', {username, password});
             //save jwt in storage
             try{
                 await AsyncStorage.setItem('token', response.data.token);
@@ -91,7 +121,6 @@ const signup = (dispatch) => {
             }
             //add token to state and move to landing page  
             dispatch({ type:'signup', payload: response.data.token});
-            generateKeys;
             navigate('mainFlow');
         }
         catch (err) {
@@ -103,10 +132,10 @@ const signup = (dispatch) => {
 };
 
 const signin = (dispatch) => {
-    return async ( { email, password } ) => {
+    return async ( { username, password } ) => {
         try {
             //attempt login 
-            const response = await loginApi.post('/signin', {email, password});
+            const response = await loginApi.post('/signin', {username, password});
 
             //store jwt for login over multiple sessions
             try{
@@ -120,37 +149,32 @@ const signin = (dispatch) => {
             
             console.log('reaches generatekeys');
             try{
-               //generate keypair and assign to public and private
-               const keyPair = pki.rsa.generateKeyPair(2048);
+               const keys = pki.rsa.generateKeyPair(2048);
                 console.log('gets past basic generation');
-               dispatch({type:'public_key_gen', payload:keyPair.publicKey});
-               /*try{
-                   await AsyncStorage.setItem('publicKey', keyPair.publicKey);
-               }
-               catch(err){
-                   dispatch({ type: 'add_error', payload: 'Problem storing public key'});
-                   console.log(err.response.data);
-               }*/
-       
-               dispatch({type:'private_key_gen', payload:keyPair.privateKey});
-               /*try{
-                   await AsyncStorage.setItem('privateKey', keyPair.privateKey);
-               }
-               catch(err){
-                   dispatch({ type: 'add_error', payload: 'Problem storing public key'});
-                   console.log(err.response.data);
-               }*/
+                
+                //await AsyncStorage.setItem('publicKey', keys.publicKey);
+                //await AsyncStorage.setItem('privateKey', keys.privateKey);
+                
+                const pem = await AsyncStorage.getItem('authcsr');
+                
+                if(!pem){
+                    const csr = makeCSR(keys.publicKey, keys.privateKey, username);
+                    try{await AsyncStorage.setItem('authcsr', csr);}
+                    catch(err){
+                        console.log(err);
+                    }
+                }
            }
            catch(err){
                dispatch({ type: 'add_error', payload: 'Problem generating keys'});
-               console.log(err.response.data);
+               console.log(err);
            }
 
             //move to main flow(account page, landing page, etc)
             navigate('mainFlow');
         }
         catch (err) {
-            dispatch({ type: 'add_error', payload: 'Incorrect email or password'});
+            dispatch({ type: 'add_error', payload: 'Incorrect username or password'});
             console.log(err.response.data);
         }
     };
@@ -165,6 +189,7 @@ const signout = dispatch => {
                 await AsyncStorage.removeItem('token');
                 await AsyncStorage.removeItem('publicKey');
                 await AsyncStorage.removeItem('privateKey');
+                await AsyncStorage.removeItem('authcsr');
                 dispatch({type: 'signout', payload: token});
             }
             catch(err){
