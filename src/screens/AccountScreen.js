@@ -4,13 +4,7 @@ import { Context as AuthContext } from '../context/AuthContext';
 import React, {useContext, useEffect, useState} from 'react';
 
 const AccountScreen = () => {
-  const { state, signout, generateKeys } = useContext(AuthContext);
-/** 
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 6000)
-  }, [])
-  */
-
+  const { state, signout } = useContext(AuthContext);
 
   return <View style={styles.container}>
         <Text>Account Screen</Text>

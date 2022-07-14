@@ -12,6 +12,7 @@ import SignUpScreen from "./src/screens/SignUpScreen";
 import AccountScreen from './src/screens/AccountScreen';
 import LandingScreen from './src/screens/LandingScreen';
 import TestScreen from "./src/screens/TestScreen";
+import { DrawerScreen } from './src/screens/DrawerScreen';
 
 import MainTabScreen from "./src/screens/MainTabScreen";
 import { Provider } from './src/context/AuthContext';
@@ -21,7 +22,7 @@ const Drawer = createDrawerNavigator();
 function drawerScreen(){
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName='Home' screenOptions={{ headerShown: false }}>
+      <Drawer.Navigator drawerContent={props => <DrawerScreen {...props} /> } screenOptions={{ headerShown: false }}>
         <Drawer.Screen name="Account" component={AccountScreen} />
         <Drawer.Screen name="Landing" component={LandingScreen} />
       </Drawer.Navigator>

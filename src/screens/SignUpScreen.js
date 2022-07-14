@@ -1,5 +1,5 @@
 import React, {useContext, useState} from 'react';
-import { View, Button, Text, StyleSheet, TextInput, Dimensions, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, Button, Text, StyleSheet, TextInput, Image, Dimensions, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
@@ -15,15 +15,19 @@ const SignUpScreen = ({navigation}) => {
     const [confirm_password, setConfirmPassword] = useState('');
     const [secureTextEntry, setSecureTextEntry] = useState(true);
     const [confirm_secureTextEntry, setConfirmSecureTextEntry] = useState(true);
+    const [loading, setLoading] = useState(false);
 
   return <View style={styles.container}>
     <NavigationEvents 
-        onWillBlur={clearErrorMessage}
+        onWillBlur={[clearErrorMessage,()=>{setLoading(false)
+            clearErrorMessage}]}
       />
       <StatusBar backgroundColor='#009387' barStyle='light-content' />
       <View style={styles.header}>
-          <Text style={styles.text_header}>Register Now</Text>
+        {loading ? <Text style={styles.text_header}>Loading...</Text>:
+            <Text style={styles.text_header}>Register Now!</Text>}
       </View>
+      {loading ? <Image style={styles.container} source={require('../loadingGif.gif')} />:
       <Animatable.View
         animation="fadeInUpBig"
         style={styles.footer}>
@@ -66,7 +70,10 @@ const SignUpScreen = ({navigation}) => {
           {state.errorMessage ? <Text style={styles.errorMessage}>{state.errorMessage}</Text> : null}
           <View style={styles.button}>
                 <TouchableOpacity
-                    onPress={()=> signup({ username, password })}
+                    onPress={()=> {
+                        setLoading(true);
+                        signup({ username, password });
+                    }}
                     style={[styles.signIn, {
                         borderColor: '#009387',
                         borderWidth: 1,
@@ -91,7 +98,7 @@ const SignUpScreen = ({navigation}) => {
                     <Text style={[styles.textSign, {color: '#009387'}]}>Sign In</Text>
                 </TouchableOpacity>
           </View>
-      </Animatable.View>
+      </Animatable.View>}
   </View>;
 };
 

@@ -56,38 +56,7 @@ const makeCSR = (publicKey, privateKey, username) => {
     return pem;
   }
 
-const generateKeys = dispatch => async () => {
-     console.log('reaches generatekeys');
-     try{
-        //generate keypair and assign to public and private
-        const keyPair = pki.rsa.generateKeyPair(2048);
 
-        const publicKey = keyPair.publicKey;
-       
-        dispatch({type:'public_key_gen', payload:publicKey});
-        try{
-            await AsyncStorage.setItem('publicKey', publicKey);
-        }
-        catch(err){
-            dispatch({ type: 'add_error', payload: 'Problem storing public key'});
-            console.log(err.response.data);
-        }
-
-        const privateKey = keyPair.privateKey;
-        dispatch({type:'private_key_gen', payload:privateKey});
-        try{
-            await AsyncStorage.setItem('privateKey', privateKey);
-        }
-        catch(err){
-            dispatch({ type: 'add_error', payload: 'Problem storing public key'});
-            console.log(err.response.data);
-        }
-    }
-    catch(err){
-        dispatch({ type: 'add_error', payload: 'Problem generating keys'});
-        console.log(err.response.data);
-    }
-}
 
 const tryLocalSignIn = dispatch => async () => {
     //attempt to get token to see if user is logged in
@@ -114,6 +83,28 @@ const signup = (dispatch) => {
             //save jwt in storage
             try{
                 await AsyncStorage.setItem('token', response.data.token);
+                console.log('reaches generatekeys');
+                try{
+                   const keys = pki.rsa.generateKeyPair(2048);
+                    console.log('gets past basic generation');
+
+                    //await AsyncStorage.setItem('publicKey', keys.publicKey);
+                    //await AsyncStorage.setItem('privateKey', keys.privateKey);
+
+                    const pem = await AsyncStorage.getItem('authcsr');
+
+                    if(!pem){
+                        const csr = makeCSR(keys.publicKey, keys.privateKey, username);
+                        try{await AsyncStorage.setItem('authcsr', csr);}
+                        catch(err){
+                            console.log(err);
+                        }
+                    }
+                }
+                catch(err){
+                    dispatch({ type: 'add_error', payload: 'Problem generating keys'});
+                    console.log(err);
+                }
             }
             catch(err){
                 dispatch({ type: 'add_error', payload: 'Problem storing JWT'});
@@ -204,6 +195,6 @@ const signout = dispatch => {
 
 export const { Provider, Context } = createDataContext(
     authReducer,
-    { signup, signin, signout, clearErrorMessage, tryLocalSignIn, generateKeys },
+    { signup, signin, signout, clearErrorMessage, tryLocalSignIn },
     { token:null, errorMessage:'', publicKey:null, privateKey:null }
 );
